@@ -1,0 +1,240 @@
+:root {
+  --primary-green: #1f6b3b;
+  --primary-green-dark: #164f2b;
+  --primary-green-light: #288147;
+  --accent-gold: #f59e0b;
+  --accent-blue: #0284c7;
+  --sidebar-bg: #1e3a2b;
+  --sidebar-hover: #162c20;
+  --bg-main: #f8fafc;
+  --border-color: #e2e8f0;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-main);
+  color: #1e293b;
+  min-height: 100vh;
+}
+
+/* Header Banner */
+.header-banner {
+  background: #ffffff;
+  border-bottom: 3px solid var(--primary-green);
+  z-index: 1030;
+}
+
+.brand-logo-badge {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-light));
+  color: #ffffff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(31, 107, 59, 0.3);
+}
+
+.company-title {
+  color: var(--primary-green);
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.3px;
+}
+
+.system-title {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #334155;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--primary-green-light);
+  font-size: 0.85rem;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  color: #1e293b;
+}
+
+/* Left Sidebar */
+.sidebar {
+  background: var(--sidebar-bg);
+  min-height: calc(100vh - 65px);
+  color: #ffffff;
+}
+
+.sidebar-heading {
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+.sidebar .nav-link {
+  color: #cbd5e1;
+  font-weight: 500;
+  padding: 9px 18px;
+  border-radius: 6px;
+  margin: 1px 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.sidebar .nav-link:hover {
+  background: var(--sidebar-hover);
+  color: #ffffff;
+  transform: translateX(3px);
+}
+
+.sidebar .nav-link.active {
+  background: var(--primary-green-light);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Content Area */
+.content-area {
+  padding: 24px 30px;
+  background-color: var(--bg-main);
+}
+
+.content-section {
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-card {
+  background: #ffffff;
+  border-radius: 8px;
+  border-top: 3px solid var(--primary-green) !important;
+  box-shadow: var(--card-shadow);
+}
+
+.hero-card {
+  background: linear-gradient(135deg, #ffffff 60%, #eef7f2 100%);
+  border-left: 4px solid var(--primary-green) !important;
+}
+
+/* Instrument Showcase Carousel */
+.instrument-icon-box {
+  width: 76px;
+  height: 76px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* KPI Stat Cards */
+.stat-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 8px;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.08);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tables */
+.table-custom {
+  font-size: 0.875rem;
+}
+
+.table-custom th {
+  background: #eef7f2;
+  color: var(--primary-green-dark);
+  font-weight: 600;
+  border-bottom: 2px solid #cbd5e1;
+  white-space: nowrap;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+/* Blueprint Viewer */
+.blueprint-canvas {
+  background: #0f172a;
+  color: #38bdf8;
+  border-radius: 8px;
+  padding: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+  border: 1px solid #334155;
+}
+
+.blueprint-grid {
+  background-image: 
+    linear-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Certificate Style */
+.certificate-box {
+  border: 2px solid #1e293b;
+  padding: 30px;
+  background: #ffffff;
+  position: relative;
+}
+
+.certificate-box::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  border: 1px solid #94a3b8;
+  pointer-events: none;
+}
+
+/* Code and mono badges */
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Print CSS */
+@media print {
+  .sidebar, .header-banner, .btn, .d-print-none {
+    display: none !important;
+  }
+  .content-area {
+    padding: 0 !important;
+    width: 100% !important;
+  }
+  .section-card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}

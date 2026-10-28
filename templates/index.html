@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gauge Management System | Plant Quality Engineering</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="header-banner sticky-top d-flex justify-content-between align-items-center shadow-sm px-4 py-2">
+    <div class="d-flex align-items-center gap-3">
+      <div class="brand-logo-badge">
+        <i class="bi bi-gear-wide-connected fs-3"></i>
+      </div>
+      <div>
+        <div class="d-flex align-items-center gap-2">
+          <h3 class="company-title mb-0">Plant Quality Engineering</h3>
+          <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">ISO 9001 / IATF 16949</span>
+        </div>
+        <p class="system-title text-muted mb-0">Gauge Management System (GMS) &bull; Metrology Portal</p>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+      <!-- Live Clock & Shift -->
+      <div class="d-none d-lg-flex flex-column text-end border-end pe-3">
+        <span class="small fw-semibold text-secondary" id="liveClock">--:--:--</span>
+        <span class="badge bg-light text-dark border">Shift A | Plant 1 Metrology</span>
+      </div>
+
+      <!-- Overdue Alert Pill -->
+      <button class="btn btn-sm btn-outline-danger position-relative d-flex align-items-center gap-1" onclick="showSection('calPlan', 'overdue')">
+        <i class="bi bi-bell-fill"></i>
+        <span>Overdue</span>
+        <span class="badge bg-danger rounded-pill" id="headerOverdueBadge">0</span>
+      </button>
+
+      <!-- Active User Context -->
+      <div class="d-flex align-items-center gap-2 ps-2">
+        <div class="user-avatar">JG</div>
+        <div class="d-flex flex-column">
+          <span class="fw-semibold user-name">Welcome : <strong>Jaya Gopal</strong></span>
+          <span class="text-muted small">Sr. Quality Assurance Lead</span>
+        </div>
+      </div>
+
+      <button class="btn btn-sm btn-outline-danger ms-2" onclick="alert('Session logged out successfully.')">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <div class="container-fluid p-0">
+    <div class="row g-0">
+      
+      <!-- Left Sidebar Navigation -->
+      <nav class="col-md-3 col-lg-2 sidebar shadow-sm">
+        <div class="sidebar-inner py-3">
+          
+          <div class="sidebar-heading px-3 pb-2 text-uppercase fw-bold text-white-50 small">Dashboard & Instruments</div>
+          <div class="nav flex-column mb-3">
+            <a class="nav-link active" onclick="showSection('home')">
+              <i class="bi bi-house-door-fill me-2"></i> Home / Showcase
+            </a>
+          </div>
+
+          <div class="sidebar-heading px-3 pb-2 text-uppercase fw-bold text-white-50 small">Gauge Inventory</div>
+          <div class="nav flex-column mb-3">
+            <a class="nav-link" onclick="showSection('addGauge')">
+              <i class="bi bi-plus-circle-fill me-2"></i> Add New Gauge
+            </a>
+            <a class="nav-link" onclick="showSection('viewGauges')">
+              <i class="bi bi-table me-2"></i> View All Gauges
+            </a>
+            <a class="nav-link" onclick="showSection('maintenance')">
+              <i class="bi bi-tools me-2"></i> Maintenance / Edit
+            </a>
+            <a class="nav-link" onclick="showSection('gaugeReport')">
+              <i class="bi bi-file-earmark-text-fill me-2"></i> History & Report
+            </a>
+            <a class="nav-link" onclick="showSection('bulkUpload')">
+              <i class="bi bi-cloud-arrow-up-fill me-2"></i> Bulk Upload (CSV)
+            </a>
+          </div>
+
+          <div class="sidebar-heading px-3 pb-2 text-uppercase fw-bold text-white-50 small">Calibration Workflow</div>
+          <div class="nav flex-column mb-3">
+            <a class="nav-link" onclick="showSection('calPlan')">
+              <i class="bi bi-calendar3-range me-2"></i> Monthly Plan
+            </a>
+            <a class="nav-link" onclick="showSection('sendCal')">
+              <i class="bi bi-send-fill me-2"></i> Send to Calibration
+            </a>
+            <a class="nav-link" onclick="showSection('receiveCal')">
+              <i class="bi bi-box-seam-fill me-2"></i> Received Gauges
+            </a>
+            <a class="nav-link" onclick="showSection('completedCal')">
+              <i class="bi bi-check2-circle me-2"></i> Completed Gauges
+            </a>
+            <a class="nav-link" onclick="showSection('dailyReports')">
+              <i class="bi bi-journal-check me-2"></i> Daily Reports
+            </a>
+          </div>
+
+          <div class="sidebar-heading px-3 pb-2 text-uppercase fw-bold text-white-50 small">Engineering & Analytics</div>
+          <div class="nav flex-column">
+            <a class="nav-link" onclick="showSection('drawingView')">
+              <i class="bi bi-bezier2 me-2"></i> Technical Drawings
+            </a>
+            <a class="nav-link" onclick="showSection('gaugeStatus')">
+              <i class="bi bi-bar-chart-steps me-2"></i> Gauge Status Matrix
+            </a>
+            <a class="nav-link" onclick="showSection('trendView')">
+              <i class="bi bi-graph-up-arrow me-2"></i> Monthly Gauge Trend
+            </a>
+          </div>
+
+          <!-- Quick Plant Info in Sidebar -->
+          <div class="sidebar-footer px-3 mt-4 pt-3 border-top border-light border-opacity-10 text-white-50 small">
+            <div><i class="bi bi-shield-check me-1"></i> Calibration Lab Room 101</div>
+            <div><i class="bi bi-thermometer-half me-1"></i> 20°C &plusmn; 1°C | 50% RH</div>
+            <div class="mt-1 text-white-50" style="font-size: 0.75rem;">GMS Build v2.4 Stable</div>
+          </div>
+
+        </div>
+      </nav>
+
+      <!-- Main Content Area -->
+      <main class="col-md-9 col-lg-10 content-area">
+
+        <!-- Toast Notification Container -->
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+          <div id="appToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+              <div class="toast-body" id="toastMessage">Action completed!</div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 1: HOME & SHOWCASE ==================== -->
+        <div id="homeSection" class="content-section">
+          
+          <!-- Top Hero / Carousel Banner -->
+          <div class="card border-0 shadow-sm mb-4 overflow-hidden hero-card">
+            <div class="card-body p-4">
+              <div class="row align-items-center">
+                <div class="col-lg-7">
+                  <span class="badge bg-success-subtle text-success mb-2 px-3 py-1 fw-bold">
+                    <i class="bi bi-cpu-fill me-1"></i> Industrial Metrology & Gauge Room
+                  </span>
+                  <h2 class="fw-bold text-dark">Central Gauge & Instrument Management</h2>
+                  <p class="text-secondary mb-3">
+                    Track ISO/IEC 17025 compliant calibration cycles, automate dispatch & check-in workflows, inspect digital blueprints, and ensure zero out-of-calibration defects on shop floors.
+                  </p>
+                  <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-success" onclick="showSection('addGauge')">
+                      <i class="bi bi-plus-lg me-1"></i> Add New Gauge
+                    </button>
+                    <button class="btn btn-outline-success" onclick="showSection('calPlan')">
+                      <i class="bi bi-calendar-check me-1"></i> View Monthly Plan
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="showSection('sendCal')">
+                      <i class="bi bi-send me-1"></i> Dispatch Batch
+                    </button>
+                  </div>
+                </div>
+                <div class="col-lg-5 mt-3 mt-lg-0">
+                  
+                  <!-- Instrument Carousel Showcase -->
+                  <div id="instrumentCarousel" class="carousel slide shadow rounded-3 overflow-hidden bg-white" data-bs-ride="carousel">
+                    <div class="carousel-indicators">
+                      <button type="button" data-bs-target="#instrumentCarousel" data-bs-slide-to="0" class="active"></button>
+                      <button type="button" data-bs-target="#instrumentCarousel" data-bs-slide-to="1"></button>
+                      <button type="button" data-bs-target="#instrumentCarousel" data-bs-slide-to="2"></button>
+                      <button type="button" data-bs-target="#instrumentCarousel" data-bs-slide-to="3"></button>
+                    </div>
+                    <div class="carousel-inner">
+                      
+                      <!-- Slide 1: Surface Plate -->
+                      <div class="carousel-item active p-4 text-center">
+                        <div class="instrument-icon-box mx-auto mb-2 bg-success-subtle text-success">
+                          <i class="bi bi-square-half fs-1"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Granite Surface Plate (Grade 0)</h5>
+                        <p class="text-muted small mb-1">630 x 630 x 100mm &bull; Flatness &le; 3.2&mu;m</p>
+                        <span class="badge bg-primary">Master Reference Standard</span>
+                      </div>
+
+                      <!-- Slide 2: Digital Micrometer -->
+                      <div class="carousel-item p-4 text-center">
+                        <div class="instrument-icon-box mx-auto mb-2 bg-primary-subtle text-primary">
+                          <i class="bi bi-arrows-collapse fs-1"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Digital Outside Micrometer</h5>
+                        <p class="text-muted small mb-1">0-25mm &bull; Least Count 0.001mm (1&mu;m)</p>
+                        <span class="badge bg-success">IP65 Water & Dust Resistant</span>
+                      </div>
+
+                      <!-- Slide 3: Vernier Caliper -->
+                      <div class="carousel-item p-4 text-center">
+                        <div class="instrument-icon-box mx-auto mb-2 bg-warning-subtle text-warning">
+                          <i class="bi bi-rulers fs-1"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Digital Vernier Caliper</h5>
+                        <p class="text-muted small mb-1">0-150mm &bull; OD, ID, Depth & Step Measurement</p>
+                        <span class="badge bg-dark">Stainless Steel Hardened</span>
+                      </div>
+
+                      <!-- Slide 4: Dial Indicator -->
+                      <div class="carousel-item p-4 text-center">
+                        <div class="instrument-icon-box mx-auto mb-2 bg-info-subtle text-info">
+                          <i class="bi bi-speedometer fs-1"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Plunger Dial Indicator</h5>
+                        <p class="text-muted small mb-1">0-10mm &bull; Least Count 0.01mm &bull; Runout Test</p>
+                        <span class="badge bg-secondary">Jeweled Bearings</span>
+                      </div>
+
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#instrumentCarousel" data-bs-slide="prev">
+                      <span class="carousel-control-prev-icon bg-dark rounded-circle p-2"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#instrumentCarousel" data-bs-slide="next">
+                      <span class="carousel-control-next-icon bg-dark rounded-circle p-2"></span>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI Metric Summary Cards -->
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+              <div class="card stat-card shadow-sm border-0 border-start border-4 border-success">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="text-muted small fw-semibold text-uppercase">Total Master Gauges</div>
+                      <h3 class="fw-bold mb-0 text-dark" id="statTotalGauges">--</h3>
+                    </div>
+                    <div class="stat-icon bg-success-subtle text-success">
+                      <i class="bi bi-tools fs-4"></i>
+                    </div>
+                  </div>
+                  <div class="mt-2 text-success small fw-semibold">
+                    <i class="bi bi-check-circle-fill"></i> In Plant Inventory
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+              <div class="card stat-card shadow-sm border-0 border-start border-4 border-warning">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="text-muted small fw-semibold text-uppercase">Due This Month</div>
+                      <h3 class="fw-bold mb-0 text-dark" id="statDueThisMonth">--</h3>
+                    </div>
+                    <div class="stat-icon bg-warning-subtle text-warning">
+                      <i class="bi bi-calendar-event fs-4"></i>
+                    </div>
+                  </div>
+                  <div class="mt-2 text-warning small fw-semibold">
+                    <i class="bi bi-clock-history"></i> Scheduled for Cal
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+              <div class="card stat-card shadow-sm border-0 border-start border-4 border-danger">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="text-muted small fw-semibold text-uppercase">Overdue / Critical</div>
+                      <h3 class="fw-bold mb-0 text-danger" id="statOverdue">--</h3>
+                    </div>
+                    <div class="stat-icon bg-danger-subtle text-danger">
+                      <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                    </div>
+                  </div>
+                  <div class="mt-2 text-danger small fw-semibold">
+                    <i class="bi bi-slash-circle"></i> Requires Immediate Attention
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+              <div class="card stat-card shadow-sm border-0 border-start border-4 border-info">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="text-muted small fw-semibold text-uppercase">In Calibration Lab</div>
+                      <h3 class="fw-bold mb-0 text-dark" id="statInLab">--</h3>
+                    </div>
+                    <div class="stat-icon bg-info-subtle text-info">
+                      <i class="bi bi-arrow-repeat fs-4"></i>
+                    </div>
+                  </div>
+                  <div class="mt-2 text-info small fw-semibold">
+                    <i class="bi bi-hourglass-split"></i> Dispatched & Processing
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Panels & Recent Activity Feed -->
+          <div class="row g-4">
+            
+            <div class="col-lg-8">
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                  <h5 class="fw-bold mb-0 text-success">
+                    <i class="bi bi-activity me-1"></i> Recent Calibration & Inspection Feed
+                  </h5>
+                  <button class="btn btn-sm btn-outline-secondary" onclick="showSection('dailyReports')">
+                    View Full Logs &raquo;
+                  </button>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                      <thead class="table-light small">
+                        <tr>
+                          <th>Gauge No</th>
+                          <th>Description</th>
+                          <th>Status</th>
+                          <th>Inspector</th>
+                          <th>Turnaround</th>
+                          <th>Certificate</th>
+                        </tr>
+                      </thead>
+                      <tbody id="homeRecentActivityBody">
+                        <tr><td colspan="6" class="text-center py-4 text-muted">Loading activities...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
+              <!-- Calibration Lab Environmental Control Widget -->
+              <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                  <h6 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-thermometer-sun text-danger me-1"></i> Calibration Room Atmosphere
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                    <div>
+                      <div class="small text-muted">Standard Temperature</div>
+                      <div class="fw-bold fs-5 text-dark">20.2 &deg;C</div>
+                    </div>
+                    <span class="badge bg-success">Nominal (&plusmn;1&deg;C)</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                    <div>
+                      <div class="small text-muted">Relative Humidity</div>
+                      <div class="fw-bold fs-5 text-dark">48.5 %</div>
+                    </div>
+                    <span class="badge bg-success">Normal (45-55%)</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                    <div>
+                      <div class="small text-muted">Master Set Traceability</div>
+                      <div class="fw-bold text-dark">NPL / NABL Standards</div>
+                    </div>
+                    <span class="badge bg-primary">Verified</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Navigation Shortcuts -->
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                  <h6 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Tasks
+                  </h6>
+                </div>
+                <div class="list-group list-group-flush">
+                  <a href="javascript:void(0)" onclick="showSection('addGauge')" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-plus-square text-success me-2"></i> Register New Tool/Gauge</span>
+                    <i class="bi bi-chevron-right text-muted small"></i>
+                  </a>
+                  <a href="javascript:void(0)" onclick="showSection('sendCal')" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-send text-primary me-2"></i> Dispatch Batch to Lab</span>
+                    <i class="bi bi-chevron-right text-muted small"></i>
+                  </a>
+                  <a href="javascript:void(0)" onclick="showSection('bulkUpload')" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-file-earmark-spreadsheet text-info me-2"></i> Upload CSV Master</span>
+                    <i class="bi bi-chevron-right text-muted small"></i>
+                  </a>
+                  <a href="javascript:void(0)" onclick="showSection('trendView')" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-pie-chart text-secondary me-2"></i> Monthly Calibration Trends</span>
+                    <i class="bi bi-chevron-right text-muted small"></i>
+                  </a>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ==================== SECTION 2: ADD GAUGE ==================== -->
+        <div id="addGaugeSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+              <div>
+                <h4 class="mb-0 text-success fw-bold">
+                  <i class="bi bi-plus-circle-fill me-2"></i>Add New Gauge / Instrument
+                </h4>
+                <p class="text-muted small mb-0">Enter full instrument specification, calibration cycle, and storage placement details.</p>
+              </div>
+              <button class="btn btn-sm btn-outline-secondary" onclick="showSection('viewGauges')">
+                <i class="bi bi-arrow-left"></i> View All Gauges
+              </button>
+            </div>
+
+            <div class="card-body p-4">
+              <form id="addGaugeForm" onsubmit="submitAddGauge(event)">
+                
+                <!-- Identification Block -->
+                <div class="row g-3 mb-4">
+                  <div class="col-12">
+                    <h6 class="text-uppercase fw-bold text-success border-bottom pb-2">
+                      <i class="bi bi-tag-fill me-1"></i> 1. Identification & Nomenclature
+                    </h6>
+                  </div>
+                  
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">NWS Gauge No <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="nws_gauge_no" id="add_nws_gauge_no" placeholder="e.g. G21-01-205" required>
+                    <div class="form-text">Unique identification code for plant traceability.</div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Gauge / Tool No <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="gauge_no" id="add_gauge_no" placeholder="e.g. G21-01-205" required>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="description" placeholder="e.g. Digital Outside Micrometer / Vernier Caliper" required>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Specification / Range</label>
+                    <input type="text" class="form-control" name="specification" placeholder="e.g. 0-25mm / 630x630x100mm">
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Least Count / Resolution</label>
+                    <input type="text" class="form-control" name="least_count" placeholder="e.g. 0.001mm / 0.01mm">
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Category</label>
+                    <select class="form-select" name="category">
+                      <option value="Micrometer">Micrometer</option>
+                      <option value="Caliper">Vernier Caliper</option>
+                      <option value="Dial Gauge">Dial Gauge / Indicator</option>
+                      <option value="Surface Plate">Surface Plate</option>
+                      <option value="Height Gauge">Height Gauge</option>
+                      <option value="Thread Gauge">Thread Plug / Ring Gauge</option>
+                      <option value="Plug Gauge">Plain Plug Gauge</option>
+                      <option value="Bore Gauge">Bore Dial Gauge</option>
+                      <option value="Torque Wrench">Torque Wrench</option>
+                      <option value="Gauge Blocks">Master Slip Gauge Set</option>
+                      <option value="Protractor">Bevel Protractor</option>
+                      <option value="Coating Gauge">Coating Thickness Gauge</option>
+                      <option value="Optical Instrument">Optical Profile Projector</option>
+                      <option value="Other">Other Precision Instrument</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Manufacturing & Physical Location Block -->
+                <div class="row g-3 mb-4">
+                  <div class="col-12">
+                    <h6 class="text-uppercase fw-bold text-success border-bottom pb-2">
+                      <i class="bi bi-geo-alt-fill me-1"></i> 2. Manufacturer & Plant Location
+                    </h6>
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Manufacturer Model</label>
+                    <input type="text" class="form-control" name="model" placeholder="e.g. QuantuMike 293 / DVC-150">
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Mfg Part / Model No</label>
+                    <input type="text" class="form-control" name="mfg_no" placeholder="e.g. MIT-293-240">
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Manufacturer Serial No</label>
+                    <input type="text" class="form-control" name="mfg_sno" placeholder="e.g. SN-892102">
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Country of Origin</label>
+                    <input type="text" class="form-control" name="country" value="India">
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Keeping Department</label>
+                    <select class="form-select" name="keeping_dept">
+                      <option value="Quality Assurance">Quality Assurance</option>
+                      <option value="Machining">Machining</option>
+                      <option value="Tool Room">Tool Room</option>
+                      <option value="Foundry">Foundry</option>
+                      <option value="Assembly">Assembly</option>
+                      <option value="Metrology Lab">Metrology Lab</option>
+                      <option value="Stores">Tool Stores</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Plant Location / Room</label>
+                    <input type="text" class="form-control" name="location" placeholder="e.g. Calibration Room / Machine Shop Line 1" value="Calibration Room">
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Placement / Shelf / Rack</label>
+                    <input type="text" class="form-control" name="placement" placeholder="e.g. Rack A1 / Station 04 / Bin C4">
+                  </div>
+                </div>
+
+                <!-- Technical Measurement & Calibration Schedule Block -->
+                <div class="row g-3 mb-4">
+                  <div class="col-12">
+                    <h6 class="text-uppercase fw-bold text-success border-bottom pb-2">
+                      <i class="bi bi-sliders me-1"></i> 3. Technical Parameters & Calibration Cycle
+                    </h6>
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Measurement Parameter</label>
+                    <input type="text" class="form-control" name="measurement" placeholder="e.g. OD, ID, Flatness, Bore, Depth">
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Display Type</label>
+                    <select class="form-select" name="display">
+                      <option value="Digital">Digital Readout (LCD)</option>
+                      <option value="Dial">Analog Dial</option>
+                      <option value="Vernier">Vernier Scale</option>
+                      <option value="Direct">Direct / Fixed Limit</option>
+                      <option value="Mechanical">Mechanical Scale</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Measurement Method</label>
+                    <select class="form-select" name="method">
+                      <option value="Direct">Direct Measurement</option>
+                      <option value="Comparative">Comparative / Transfer</option>
+                      <option value="Optical">Optical Projection</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Gauge Classification</label>
+                    <select class="form-select" name="gauge_type">
+                      <option value="Working">Working Gauge (Shopfloor)</option>
+                      <option value="Standard">Standard / Inspection</option>
+                      <option value="Reference">Master Reference Standard</option>
+                      <option value="Transfer">Transfer Standard</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Calibration Basis</label>
+                    <select class="form-select" name="basis">
+                      <option value="Periodic">Periodic (Time-based)</option>
+                      <option value="Initial">Initial Commissioning</option>
+                      <option value="On-Demand">On-Demand / After Repair</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Calibration Cycle (Months)</label>
+                    <input type="number" class="form-control" name="cal_cycle_months" id="add_cal_cycle" value="12" min="1" max="60" oninput="calculateNextDueDate()">
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Last Calibration Date</label>
+                    <input type="date" class="form-control" name="last_cal_date" id="add_last_cal" oninput="calculateNextDueDate()">
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold">Next Due Date (Auto-calc)</label>
+                    <input type="date" class="form-control bg-light" name="next_due_date" id="add_next_due">
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Received Date</label>
+                    <input type="date" class="form-control" name="received_date" id="add_received_date">
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Initial Status</label>
+                    <select class="form-select" name="status">
+                      <option value="Accept">Accept (Fit for Use)</option>
+                      <option value="Under Repair">Under Repair</option>
+                      <option value="Scrap">Scrap / Decommissioned</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label class="form-label fw-semibold">Drawing / Spec Sheet Title</label>
+                    <input type="text" class="form-control" name="drawing_title" placeholder="e.g. DWG-GMS-012 Outside Micrometer Spec">
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label fw-semibold">Remarks & Maintenance Notes</label>
+                    <textarea class="form-control" name="note" rows="2" placeholder="e.g. Master reference gauge stored in temperature-controlled cabinet. Handle with lint-free gloves."></textarea>
+                  </div>
+
+                </div>
+
+                <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                  <button type="reset" class="btn btn-light px-4">Reset Form</button>
+                  <button type="submit" class="btn btn-success px-5 fw-semibold">
+                    <i class="bi bi-check-lg me-1"></i> Register Gauge
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 3: VIEW ALL GAUGES ==================== -->
+        <div id="viewGaugesSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                  <h4 class="mb-0 text-success fw-bold">
+                    <i class="bi bi-table me-2"></i>Master Gauge Register
+                  </h4>
+                  <p class="text-muted small mb-0">Complete list of registered measuring instruments, calibration cycles, and locations.</p>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-success" onclick="exportGaugesToCSV()">
+                    <i class="bi bi-download me-1"></i> Export CSV
+                  </button>
+                  <button class="btn btn-sm btn-outline-dark" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i> Print Register
+                  </button>
+                  <button class="btn btn-sm btn-success" onclick="showSection('addGauge')">
+                    <i class="bi bi-plus-lg me-1"></i> Add Gauge
+                  </button>
+                </div>
+              </div>
+
+              <!-- Filter Bar -->
+              <div class="row g-2 mt-3 pt-2 border-top">
+                <div class="col-md-3">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="gaugeSearchInput" placeholder="Search Gauge No, Description..." oninput="debounceLoadGauges()">
+                  </div>
+                </div>
+
+                <div class="col-md-2">
+                  <select class="form-select form-select-sm" id="gaugeCategoryFilter" onchange="loadGauges()">
+                    <option value="">All Categories</option>
+                    <option value="Micrometer">Micrometer</option>
+                    <option value="Caliper">Caliper</option>
+                    <option value="Dial Gauge">Dial Gauge</option>
+                    <option value="Surface Plate">Surface Plate</option>
+                    <option value="Height Gauge">Height Gauge</option>
+                    <option value="Thread Gauge">Thread Gauge</option>
+                    <option value="Plug Gauge">Plug Gauge</option>
+                    <option value="Bore Gauge">Bore Gauge</option>
+                    <option value="Torque Wrench">Torque Wrench</option>
+                  </select>
+                </div>
+
+                <div class="col-md-2">
+                  <select class="form-select form-select-sm" id="gaugeDeptFilter" onchange="loadGauges()">
+                    <option value="">All Departments</option>
+                    <option value="Quality Assurance">Quality Assurance</option>
+                    <option value="Machining">Machining</option>
+                    <option value="Tool Room">Tool Room</option>
+                    <option value="Foundry">Foundry</option>
+                    <option value="Assembly">Assembly</option>
+                  </select>
+                </div>
+
+                <div class="col-md-2">
+                  <select class="form-select form-select-sm" id="gaugeStatusFilter" onchange="loadGauges()">
+                    <option value="">All Statuses</option>
+                    <option value="Accept">Accept</option>
+                    <option value="Under Repair">Under Repair</option>
+                    <option value="Scrap">Scrap</option>
+                  </select>
+                </div>
+
+                <div class="col-md-3">
+                  <select class="form-select form-select-sm" id="gaugeCalUrgencyFilter" onchange="loadGauges()">
+                    <option value="">All Calibration Status</option>
+                    <option value="overdue">Overdue Only (&lt; Today)</option>
+                    <option value="due_soon">Due Soon (&le; 30 Days)</option>
+                    <option value="valid">Valid / In-Date</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover table-custom mb-0 align-middle">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;">S.No</th>
+                      <th>NWS Gauge No</th>
+                      <th>Gauge No</th>
+                      <th>Description & Specification</th>
+                      <th>Dept & Location</th>
+                      <th>Cycle</th>
+                      <th>Last Cal</th>
+                      <th>Next Due Date</th>
+                      <th>Status</th>
+                      <th class="text-center" style="width: 140px;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="gaugeMasterTableBody">
+                    <tr><td colspan="10" class="text-center py-4 text-muted">Loading master gauge register...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center py-2 px-3 small text-muted">
+              <span id="gaugeCountSummary">Showing 0 gauges</span>
+              <span>Sorted by Newest First</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 4: MAINTENANCE / EDIT ==================== -->
+        <div id="maintenanceSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3">
+              <h4 class="mb-0 text-success fw-bold">
+                <i class="bi bi-tools me-2"></i>Gauge Maintenance & Condition Management
+              </h4>
+              <p class="text-muted small mb-0">Select any gauge to update operational condition, tag under repair, adjust zero errors, or scrap defective instruments.</p>
+            </div>
+            <div class="card-body p-4">
+              
+              <div class="row g-4">
+                <div class="col-md-5">
+                  <label class="form-label fw-semibold">Select Gauge to Maintain / Edit</label>
+                  <select class="form-select mb-3" id="maintenanceSelectGauge" onchange="onSelectMaintenanceGauge()">
+                    <option value="">-- Choose a gauge --</option>
+                  </select>
+
+                  <div id="maintenanceGaugeQuickCard" class="card bg-light border p-3 d-none">
+                    <h6 class="fw-bold text-dark mb-1" id="mQuickNws">NWS-000</h6>
+                    <div class="text-muted small mb-2" id="mQuickDesc">Description</div>
+                    <ul class="list-unstyled small mb-0">
+                      <li><strong>Location:</strong> <span id="mQuickLoc">-</span></li>
+                      <li><strong>Department:</strong> <span id="mQuickDept">-</span></li>
+                      <li><strong>Current Status:</strong> <span id="mQuickStatus" class="badge bg-success">Accept</span></li>
+                      <li><strong>Next Due Date:</strong> <span id="mQuickDue">-</span></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="col-md-7">
+                  <form id="maintenanceEditForm" onsubmit="submitMaintenanceUpdate(event)">
+                    <input type="hidden" id="edit_gauge_id" name="gauge_id">
+
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold">Operational Status</label>
+                        <select class="form-select" id="edit_status" name="status">
+                          <option value="Accept">Accept (Fit for Production)</option>
+                          <option value="Under Repair">Under Repair / In Servicing</option>
+                          <option value="Scrap">Scrap / Decommission</option>
+                        </select>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold">Location / Room</label>
+                        <input type="text" class="form-control" id="edit_location" name="location">
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold">Placement / Shelf</label>
+                        <input type="text" class="form-control" id="edit_placement" name="placement">
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold">Department</label>
+                        <select class="form-select" id="edit_keeping_dept" name="keeping_dept">
+                          <option value="Quality Assurance">Quality Assurance</option>
+                          <option value="Machining">Machining</option>
+                          <option value="Tool Room">Tool Room</option>
+                          <option value="Foundry">Foundry</option>
+                          <option value="Assembly">Assembly</option>
+                        </select>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold">Calibration Cycle (Months)</label>
+                        <input type="number" class="form-control" id="edit_cycle" name="cal_cycle_months">
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold">Next Due Date</label>
+                        <input type="date" class="form-control" id="edit_next_due" name="next_due_date">
+                      </div>
+
+                      <div class="col-12">
+                        <label class="form-label fw-semibold">Maintenance Actions & Condition Notes</label>
+                        <textarea class="form-control" id="edit_note" name="note" rows="3" placeholder="e.g. Zero setting calibrated, anvil polished with diamond paste, battery replaced with SR44..."></textarea>
+                      </div>
+
+                      <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-success px-4" id="btnSaveMaintenance" disabled>
+                          <i class="bi bi-save me-1"></i> Save Maintenance Record
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 5: REPORT / GAUGE HISTORY ==================== -->
+        <div id="gaugeReportSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3">
+              <h4 class="mb-0 text-success fw-bold">
+                <i class="bi bi-file-earmark-text-fill me-2"></i>Gauge Calibration History & Certificate Search
+              </h4>
+              <p class="text-muted small mb-0">Search any gauge by NWS Gauge No or Tool No to inspect complete audit trail, certificate numbers, and turnaround times.</p>
+            </div>
+            <div class="card-body p-4">
+              
+              <!-- Search Bar -->
+              <div class="row justify-content-center mb-4">
+                <div class="col-md-8">
+                  <div class="input-group input-group-lg shadow-sm">
+                    <span class="input-group-text bg-white text-success"><i class="bi bi-search fs-5"></i></span>
+                    <input type="text" class="form-control" id="reportSearchInput" placeholder="Enter NWS Gauge No (e.g. G21-06-204 or G21-01-101)...">
+                    <button class="btn btn-success px-4 fw-semibold" onclick="searchGaugeHistory()">
+                      Search History
+                    </button>
+                  </div>
+                  <div class="form-text text-center mt-2">
+                    Quick suggestions: 
+                    <a href="javascript:void(0)" onclick="quickReportSearch('G21-06-204')">G21-06-204</a> &bull;
+                    <a href="javascript:void(0)" onclick="quickReportSearch('G21-01-101')">G21-01-101</a> &bull;
+                    <a href="javascript:void(0)" onclick="quickReportSearch('G21-05-088')">G21-05-088</a> &bull;
+                    <a href="javascript:void(0)" onclick="quickReportSearch('G21-01-102')">G21-01-102</a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Report Results Panel -->
+              <div id="reportResultContainer" class="d-none">
+                
+                <!-- Gauge Header Summary -->
+                <div class="card bg-light border-0 p-3 mb-4 rounded-3">
+                  <div class="row align-items-center">
+                    <div class="col-md-8">
+                      <div class="d-flex align-items-center gap-2 mb-1">
+                        <h4 class="fw-bold text-dark mb-0" id="reportGaugeTitle">G21-06-204</h4>
+                        <span class="badge bg-success" id="reportGaugeStatusBadge">Accept</span>
+                        <span class="badge bg-light text-dark border" id="reportGaugeCategoryBadge">Surface Plate</span>
+                      </div>
+                      <p class="text-muted mb-1" id="reportGaugeSpec">630X630X100MM Grade 0 | Least Count: 0.001mm</p>
+                      <div class="small text-secondary">
+                        <i class="bi bi-geo-alt"></i> Location: <strong id="reportGaugeLoc">Calibration Room</strong> &bull;
+                        Dept: <strong id="reportGaugeDept">Quality Assurance</strong> &bull;
+                        Cycle: <strong id="reportGaugeCycle">12 Months</strong>
+                      </div>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                      <div class="small text-muted">Next Calibration Due Date</div>
+                      <h4 class="text-success fw-bold mb-0" id="reportGaugeNextDue">--</h4>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Timeline / Audit Logs -->
+                <h5 class="fw-bold text-dark mb-3">
+                  <i class="bi bi-clock-history text-success me-1"></i> Complete Calibration Timeline & Certificates
+                </h5>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Log ID</th>
+                        <th>Plan Date</th>
+                        <th>Sent Date</th>
+                        <th>Received Date</th>
+                        <th>Completed Date</th>
+                        <th>Status</th>
+                        <th>Turnaround (Hrs)</th>
+                        <th>Inspector</th>
+                        <th>Certificate No</th>
+                        <th>Result</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="reportLogsTableBody">
+                      <tr><td colspan="11" class="text-center text-muted py-3">No calibration logs found.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 6: BULK UPLOAD ==================== -->
+        <div id="bulkUploadSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3">
+              <h4 class="mb-0 text-success fw-bold">
+                <i class="bi bi-cloud-arrow-up-fill me-2"></i>Bulk Data Upload & Master Import
+              </h4>
+              <p class="text-muted small mb-0">Upload Excel/CSV spreadsheets to bulk import tool registers, monthly calibration tasklists, or scrap notifications.</p>
+            </div>
+
+            <div class="card-body p-4">
+              
+              <!-- Tabs for 3 Bulk Upload types -->
+              <ul class="nav nav-pills mb-4" id="bulkUploadTabs" role="tablist">
+                <li class="nav-item">
+                  <button class="nav-link active fw-semibold" id="tab-master" data-bs-toggle="pill" onclick="switchBulkType('master')">
+                    <i class="bi bi-tools me-1"></i> 1. Tool / Instrument Master
+                  </button>
+                </li>
+                <li class="nav-item">
+                  <button class="nav-link fw-semibold" id="tab-tasklist" data-bs-toggle="pill" onclick="switchBulkType('tasklist')">
+                    <i class="bi bi-calendar-check me-1"></i> 2. Calibration Tasklist
+                  </button>
+                </li>
+                <li class="nav-item">
+                  <button class="nav-link fw-semibold" id="tab-scrap" data-bs-toggle="pill" onclick="switchBulkType('scrap')">
+                    <i class="bi bi-trash3 me-1"></i> 3. Scrap / Decommission List
+                  </button>
+                </li>
+              </ul>
+
+              <div class="row g-4">
+                <div class="col-lg-6">
+                  
+                  <div class="p-4 border rounded-3 bg-light">
+                    <h5 class="fw-bold text-dark mb-2" id="bulkUploadTitle">Tool / Instrument Master Upload</h5>
+                    <p class="text-muted small mb-3" id="bulkUploadDesc">
+                      Import multiple gauges at once with NWS number, description, specifications, department, calibration cycles, and locations.
+                    </p>
+
+                    <!-- Download Template Button -->
+                    <div class="mb-4">
+                      <a href="/api/gauges/template/master" id="btnDownloadTemplate" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-file-earmark-arrow-down me-1"></i> Download Sample CSV Template
+                      </a>
+                    </div>
+
+                    <!-- File Input Form -->
+                    <form id="bulkUploadForm" onsubmit="submitBulkUpload(event)">
+                      <input type="hidden" name="upload_type" id="bulkUploadTypeInput" value="master">
+                      
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Choose CSV File</label>
+                        <input class="form-control" type="file" id="bulkCsvFile" accept=".csv" required onchange="previewCsvFile(event)">
+                        <div class="form-text">File format must be standard UTF-8 CSV with header columns.</div>
+                      </div>
+
+                      <button type="submit" class="btn btn-success px-4" id="btnUploadSubmit">
+                        <i class="bi bi-upload me-1"></i> Process & Import to Database
+                      </button>
+                    </form>
+
+                  </div>
+
+                </div>
+
+                <div class="col-lg-6">
+                  <div class="card h-100 border">
+                    <div class="card-header bg-white py-2 fw-semibold text-secondary small">
+                      <i class="bi bi-eye me-1"></i> File Preview (First 5 Rows)
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="table-responsive" style="max-height: 280px;">
+                        <table class="table table-sm table-striped mb-0 small" id="csvPreviewTable">
+                          <tbody id="csvPreviewBody">
+                            <tr><td class="text-center text-muted py-5">Select a CSV file to preview columns and data before uploading.</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 7: MONTHLY CALIBRATION PLAN ==================== -->
+        <div id="calPlanSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                  <h4 class="mb-0 text-success fw-bold">
+                    <i class="bi bi-calendar3-range me-2"></i>Monthly Calibration Schedule & Plan
+                  </h4>
+                  <p class="text-muted small mb-0">Plan, track, and monitor calibration due dates across plant production departments.</p>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-success" onclick="showSection('sendCal')">
+                    <i class="bi bi-send me-1"></i> Dispatch Selected to Lab
+                  </button>
+                </div>
+              </div>
+
+              <!-- Date Filters -->
+              <div class="row g-2 mt-3 pt-2 border-top align-items-end">
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold mb-1">Start Date</label>
+                  <input type="date" class="form-control form-control-sm" id="calPlanStartDate">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold mb-1">End Date</label>
+                  <input type="date" class="form-control form-control-sm" id="calPlanEndDate">
+                </div>
+                <div class="col-md-2">
+                  <button class="btn btn-sm btn-outline-success w-100" onclick="loadCalibrationPlan()">
+                    <i class="bi bi-funnel"></i> Apply Date Filter
+                  </button>
+                </div>
+                <div class="col-md-2">
+                  <button class="btn btn-sm btn-light w-100" onclick="resetCalPlanFilter()">
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover table-custom mb-0 align-middle">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;">S.No</th>
+                      <th>NWS Gauge No</th>
+                      <th>Description</th>
+                      <th>Specification</th>
+                      <th>Location</th>
+                      <th>Last Cal Date</th>
+                      <th>Next Due Date</th>
+                      <th>Urgency / Status</th>
+                      <th class="text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="calPlanTableBody">
+                    <tr><td colspan="9" class="text-center py-4 text-muted">Loading calibration plan...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 8: SEND TO CALIBRATION ==================== -->
+        <div id="sendCalSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3">
+              <h4 class="mb-0 text-success fw-bold">
+                <i class="bi bi-send-fill me-2"></i>Send Gauges to Calibration Lab / Room
+              </h4>
+              <p class="text-muted small mb-0">Select multiple gauges using checkboxes to create a batch dispatch challan to the plant calibration room or NABL lab.</p>
+            </div>
+
+            <div class="card-body p-4">
+              
+              <!-- Dispatch Configuration Form -->
+              <div class="card bg-light border-0 p-3 mb-4 rounded-3">
+                <h6 class="fw-bold text-dark mb-2">
+                  <i class="bi bi-box-arrow-up-right text-success me-1"></i> Dispatch Batch Details
+                </h6>
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Target Calibration Lab / Agency</label>
+                    <select class="form-select form-select-sm" id="dispatchAgency">
+                      <option value="Internal Plant Gauge Room">Internal Plant Gauge Room (Room 101)</option>
+                      <option value="National Calibration Services (NABL)">National Calibration Services (NABL Accredited)</option>
+                      <option value="Mitutoyo Authorized Service Center">Mitutoyo Authorized Service Center</option>
+                      <option value="Baker Gauges Service Lab">Baker Gauges Service Lab</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Dispatch Date & Time</label>
+                    <input type="datetime-local" class="form-control form-control-sm" id="dispatchSentDate">
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Dispatched By</label>
+                    <input type="text" class="form-control form-control-sm" id="dispatchDispatchedBy" value="Jaya Gopal" readonly>
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Special Instructions</label>
+                    <input type="text" class="form-control form-control-sm" id="dispatchRemarks" placeholder="e.g. Include 10-point linearity test">
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                  <span class="small text-muted" id="selectedDispatchCountText">0 gauges selected for dispatch</span>
+                  <button class="btn btn-success px-4" id="btnDispatchBatch" onclick="submitDispatchBatch()" disabled>
+                    <i class="bi bi-send-check me-1"></i> Confirm & Dispatch Batch
+                  </button>
+                </div>
+              </div>
+
+              <!-- Available Gauges Multi-select Table -->
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 40px;" class="text-center">
+                        <input class="form-check-input" type="checkbox" id="selectAllDispatch" onchange="toggleSelectAllDispatch(this)">
+                      </th>
+                      <th>NWS Gauge No</th>
+                      <th>Description</th>
+                      <th>Specification</th>
+                      <th>Department</th>
+                      <th>Location</th>
+                      <th>Next Due Date</th>
+                      <th>Calibration Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dispatchGaugesTableBody">
+                    <tr><td colspan="8" class="text-center py-4 text-muted">Loading gauges available for dispatch...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 9: RECEIVED GAUGES ==================== -->
+        <div id="receiveCalSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3">
+              <h4 class="mb-0 text-success fw-bold">
+                <i class="bi bi-box-seam-fill me-2"></i>Received Gauges Check-In & Inspection
+              </h4>
+              <p class="text-muted small mb-0">Check-in gauges arriving from calibration room. Verify visual integrity, accessories, and accept or reject.</p>
+            </div>
+
+            <div class="card-body p-4">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>NWS Gauge No</th>
+                      <th>Description</th>
+                      <th>Dispatched Agency</th>
+                      <th>Sent Date</th>
+                      <th>Status</th>
+                      <th>Remarks</th>
+                      <th class="text-center" style="width: 220px;">Check-In Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="receivedGaugesTableBody">
+                    <tr><td colspan="7" class="text-center py-4 text-muted">No pending gauges currently in transit or sent.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 10: COMPLETED GAUGES ==================== -->
+        <div id="completedCalSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+              <div>
+                <h4 class="mb-0 text-success fw-bold">
+                  <i class="bi bi-check2-circle me-2"></i>Completed Calibrations & Turnaround Log
+                </h4>
+                <p class="text-muted small mb-0">List of successfully completed calibrations with recorded turnaround hours and certificate numbers.</p>
+              </div>
+              <button class="btn btn-sm btn-outline-success" onclick="openDirectCompleteModal()">
+                <i class="bi bi-plus-circle me-1"></i> Log Calibration Result
+              </button>
+            </div>
+
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Certificate No</th>
+                      <th>NWS Gauge No</th>
+                      <th>Description</th>
+                      <th>Completed Date</th>
+                      <th>Turnaround Time</th>
+                      <th>Calibrated By</th>
+                      <th>Agency</th>
+                      <th>Result</th>
+                      <th class="text-center">Certificate</th>
+                    </tr>
+                  </thead>
+                  <tbody id="completedGaugesTableBody">
+                    <tr><td colspan="9" class="text-center py-4 text-muted">Loading completed calibration records...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 11: DAILY CALIBRATION REPORTS ==================== -->
+        <div id="dailyReportsSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                  <h4 class="mb-0 text-success fw-bold">
+                    <i class="bi bi-journal-check me-2"></i>Daily & Person-Wise Calibration Reports
+                  </h4>
+                  <p class="text-muted small mb-0">Filter calibration records by exact date, month, or technician (e.g. Jaya Gopal, Suresh Babu, Ramesh Kumar).</p>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-success" onclick="exportReportsToCSV()">
+                    <i class="bi bi-download me-1"></i> Export Report
+                  </button>
+                  <button class="btn btn-sm btn-outline-dark" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i> Print
+                  </button>
+                </div>
+              </div>
+
+              <!-- Filter Bar -->
+              <div class="row g-2 mt-3 pt-2 border-top align-items-end">
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold mb-1">Specific Date</label>
+                  <input type="date" class="form-control form-control-sm" id="reportFilterDate" onchange="loadDailyReports()">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold mb-1">Technician / Calibrated By</label>
+                  <input type="text" class="form-control form-control-sm" id="reportFilterPerson" placeholder="e.g. Jaya Gopal" oninput="debounceLoadDailyReports()">
+                </div>
+                <div class="col-md-2">
+                  <button class="btn btn-sm btn-light w-100" onclick="resetReportFilters()">
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>S.No</th>
+                      <th>Date</th>
+                      <th>NWS Gauge No</th>
+                      <th>Description</th>
+                      <th>Department</th>
+                      <th>Calibrated By</th>
+                      <th>Turnaround</th>
+                      <th>Certificate No</th>
+                      <th>Result</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dailyReportsTableBody">
+                    <tr><td colspan="9" class="text-center py-4 text-muted">Loading daily reports...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 12: ENGINEERING DRAWINGS ==================== -->
+        <div id="drawingViewSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+              <div>
+                <h4 class="mb-0 text-success fw-bold">
+                  <i class="bi bi-bezier2 me-2"></i>Engineering Drawings & Specification Sheets
+                </h4>
+                <p class="text-muted small mb-0">View CAD blueprints, dimension limits, measurement schemes, and tolerance sheets linked to plant gauges.</p>
+              </div>
+              <button class="btn btn-sm btn-success" onclick="openAddDrawingModal()">
+                <i class="bi bi-plus-lg me-1"></i> Attach New Drawing
+              </button>
+            </div>
+
+            <div class="card-body p-4">
+              <div class="row g-4" id="drawingsGrid">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 13: GAUGE STATUS MATRIX ==================== -->
+        <div id="gaugeStatusSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3">
+              <h4 class="mb-0 text-success fw-bold">
+                <i class="bi bi-bar-chart-steps me-2"></i>Gauge Status & Department Compliance Matrix
+              </h4>
+              <p class="text-muted small mb-0">Department-wise comparison of Total Gauges vs Active (Accept) vs Under Repair vs Scrap vs Calibration In-Progress.</p>
+            </div>
+
+            <div class="card-body p-4">
+              
+              <!-- Summary Matrix KPI row -->
+              <div class="row g-3 mb-4 text-center">
+                <div class="col-md-2">
+                  <div class="p-3 bg-light rounded border">
+                    <div class="text-muted small fw-semibold">Total Gauges</div>
+                    <h3 class="fw-bold mb-0 text-dark" id="matrixTotal">--</h3>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="p-3 bg-success-subtle rounded border border-success-subtle">
+                    <div class="text-success small fw-semibold">Accept (Valid)</div>
+                    <h3 class="fw-bold mb-0 text-success" id="matrixAccept">--</h3>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="p-3 bg-warning-subtle rounded border border-warning-subtle">
+                    <div class="text-warning small fw-semibold">Under Repair</div>
+                    <h3 class="fw-bold mb-0 text-warning" id="matrixRepair">--</h3>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="p-3 bg-danger-subtle rounded border border-danger-subtle">
+                    <div class="text-danger small fw-semibold">Scrap</div>
+                    <h3 class="fw-bold mb-0 text-danger" id="matrixScrap">--</h3>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="p-3 bg-info-subtle rounded border border-info-subtle">
+                    <div class="text-info small fw-semibold">In Calibration Lab</div>
+                    <h3 class="fw-bold mb-0 text-info" id="matrixInCal">--</h3>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="p-3 bg-primary-subtle rounded border border-primary-subtle">
+                    <div class="text-primary small fw-semibold">Completed Calibrations</div>
+                    <h3 class="fw-bold mb-0 text-primary" id="matrixCompleted">--</h3>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Department breakdown table -->
+              <h5 class="fw-bold text-dark mb-3">
+                <i class="bi bi-building me-1 text-success"></i> Department-Wise Compliance Summary
+              </h5>
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Plant Department</th>
+                      <th class="text-center">Total Gauges</th>
+                      <th class="text-center text-success">Accept</th>
+                      <th class="text-center text-warning">Under Repair</th>
+                      <th class="text-center text-danger">Scrap</th>
+                      <th class="text-center">Compliance Rate (%)</th>
+                      <th>Status Bar</th>
+                    </tr>
+                  </thead>
+                  <tbody id="departmentMatrixBody">
+                    <tr><td colspan="7" class="text-center py-4 text-muted">Loading department status matrix...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== SECTION 14: MONTHLY GAUGE TREND ==================== -->
+        <div id="trendViewSection" class="content-section d-none">
+          <div class="card border-0 shadow-sm section-card">
+            <div class="card-header bg-white py-3">
+              <h4 class="mb-0 text-success fw-bold">
+                <i class="bi bi-graph-up-arrow me-2"></i>Monthly Calibration Trend & Quality Analytics
+              </h4>
+              <p class="text-muted small mb-0">Multi-dimensional interactive analytics tracking scheduled plan vs completed vs pending calibrations over time.</p>
+            </div>
+
+            <div class="card-body p-4">
+              
+              <div class="row g-4">
+                
+                <!-- Main Trend Bar Chart -->
+                <div class="col-lg-8">
+                  <div class="card border shadow-sm p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h6 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-bar-chart-fill text-success me-1"></i> Calibration Performance: Plan vs Completed vs Pending
+                      </h6>
+                      <span class="badge bg-light text-muted border">Last 6 Months</span>
+                    </div>
+                    <div style="height: 340px; position: relative;">
+                      <canvas id="trendChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Category Breakdown Doughnut -->
+                <div class="col-lg-4">
+                  <div class="card border shadow-sm p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h6 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-pie-chart-fill text-primary me-1"></i> Gauge Category Distribution
+                      </h6>
+                    </div>
+                    <div style="height: 260px; position: relative;">
+                      <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="mt-2 text-center small text-muted">
+                      Categorized by metrological measurement type
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Department Allocation Chart -->
+                <div class="col-lg-12">
+                  <div class="card border shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h6 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-diagram-3-fill text-info me-1"></i> Gauge Deployment Across Plant Departments
+                      </h6>
+                    </div>
+                    <div style="height: 220px; position: relative;">
+                      <canvas id="deptChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal 1: Gauge View Details Modal -->
+  <div class="modal fade" id="gaugeDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title fw-bold" id="gModalTitle">Gauge Specification & Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="gModalBody">
+          <!-- Populated dynamically -->
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Printable Calibration Certificate Modal -->
+  <div class="modal fade" id="certificateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title fw-bold"><i class="bi bi-patch-check-fill text-warning me-2"></i>Calibration Certificate</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="certificateModalBody">
+          <!-- Populated dynamically -->
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-dark" onclick="printCertificate()"><i class="bi bi-printer me-1"></i> Print Certificate</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Complete Calibration Log Modal -->
+  <div class="modal fade" id="completeCalibrationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title fw-bold">Log Calibration Completion</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="completeCalForm" onsubmit="submitCompleteCalibration(event)">
+            <input type="hidden" id="comp_log_id" name="log_id">
+            <input type="hidden" id="comp_gauge_id" name="gauge_id">
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Target Gauge</label>
+              <input type="text" class="form-control bg-light" id="comp_gauge_info" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Calibration Completion Date & Time</label>
+              <input type="datetime-local" class="form-control" id="comp_date" name="completed_date" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Calibration Certificate Number</label>
+              <input type="text" class="form-control" id="comp_cert_no" name="certificate_no" placeholder="e.g. PQE/CAL/26/0411" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Calibrated By (Inspector)</label>
+              <input type="text" class="form-control" id="comp_calibrated_by" name="calibrated_by" value="Jaya Gopal" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Calibration Agency</label>
+              <input type="text" class="form-control" id="comp_agency" name="agency" value="Internal Plant Gauge Room">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Result / Acceptance</label>
+              <select class="form-select" id="comp_result" name="result">
+                <option value="Pass">Pass (Within Permissible Tolerance)</option>
+                <option value="Derate">Derate (Restricted Application)</option>
+                <option value="Fail">Fail (Out of Tolerance / Reject)</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Next Calibration Due Date</label>
+              <input type="date" class="form-control" id="comp_next_due" name="next_due_date">
+              <div class="form-text">Leave blank to auto-calculate based on cycle months.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Remarks & Traceability Standard</label>
+              <textarea class="form-control" id="comp_remarks" name="remarks" rows="2" placeholder="e.g. Verified with Slip Gauge Set Mitutoyo Grade 0. Error <= 0.001mm."></textarea>
+            </div>
+
+            <div class="text-end">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-success px-4">Submit Calibration</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Interactive Engineering Drawing & Blueprint Viewer -->
+  <div class="modal fade" id="drawingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-dark text-white">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-bezier2 text-info fs-4"></i>
+            <div>
+              <h5 class="modal-title fw-bold mb-0" id="drawModalTitle">Engineering Drawing</h5>
+              <span class="small text-white-50" id="drawModalDocNo">DWG-GMS-000</span>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="drawModalBody">
+          <!-- Populated dynamically with interactive SVG blueprint -->
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Add Drawing Specification Modal -->
+  <div class="modal fade" id="addDrawingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title fw-bold">Attach Engineering Drawing</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="addDrawingForm" onsubmit="submitAddDrawing(event)">
+            
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Select Target Gauge</label>
+              <select class="form-select" id="draw_gauge_id" name="gauge_id" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Document / Drawing Number</label>
+              <input type="text" class="form-control" id="draw_doc_number" name="doc_number" placeholder="e.g. DWG-GMS-014">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Drawing Title</label>
+              <input type="text" class="form-control" id="draw_title" name="title" placeholder="e.g. Spindle & Anvil Parallelism Schematic" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Revision</label>
+              <input type="text" class="form-control" id="draw_revision" name="revision" value="Rev 1.0">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Specification & Tolerance Notes</label>
+              <textarea class="form-control" id="draw_spec_notes" name="spec_notes" rows="3" placeholder="e.g. Permissible parallelism error <= 1.0 micron. Flatness tolerance Grade 0."></textarea>
+            </div>
+
+            <div class="text-end">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-success px-4">Attach Drawing</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Application JS -->
+  <script src="/static/js/app.js"></script>
+
+</body>
+</html>
